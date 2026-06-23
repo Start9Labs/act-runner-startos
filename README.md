@@ -1,26 +1,152 @@
-# Gitea Actions Runner for StartOS
+<p align="center">
+  <img src="icon.svg" alt="Gitea Actions Runner Logo" width="21%">
+</p>
 
-Runs [Gitea Actions](https://docs.gitea.com/usage/actions/overview) CI/CD jobs for the **Gitea instance on this device** — a hard dependency. Uses Gitea's `act_runner`.
+# Gitea Actions Runner on StartOS
 
-## How this package works
+> **Upstream docs:** <https://docs.gitea.com/usage/actions/overview>
+>
+> Everything not listed in this document behaves identically to upstream act_runner. If a feature, setting, or behavior is not mentioned here, the upstream documentation is accurate and fully applicable.
 
-- **Rootless nested OCI.** Each job runs in its own container via a rootless **Podman** engine inside the service (manifest `nestedRuntime`; see the packaging guide's "Run a Nested OCI Runtime" recipe). No privileged Docker-in-Docker, and untrusted job code is isolated from the host and from your repos.
-- **Multi-arch via host emulation.** StartOS registers QEMU `binfmt` handlers (fix-binary flag) host-wide at boot, so a job targeting a foreign architecture (`arm64`, `riscv64`, …) runs under emulation automatically — no per-container setup. Emulated builds are much slower; prefer a native runner per architecture.
-- **Outbound only.** The runner dials its Gitea and long-polls for jobs; it exposes no inbound interface.
-- **Registration.** On start, an entrypoint brings up the rootless Podman socket, wires `DOCKER_HOST` to it, then registers once (idempotent via the `.runner` state file) against the local Gitea (`gitea.startos`) with the token from the Configure action, and runs `act_runner daemon`.
+[act_runner](https://gitea.com/gitea/act_runner) executes Gitea Actions (CI/CD) workflows. This repository packages it for [StartOS](https://github.com/Start9Labs/start-os/), where it runs each job inside a rootless, nested OCI sandbox and serves the Gitea instance installed on the same device.
 
-## Scope
+---
 
-This runner serves **only** the Gitea on the same device (a required dependency). A box that wants its own CI runs its own runner; there is no remote-forge mode. (Start9's cross-machine / multi-arch CI fleet is handled by server-side infrastructure, not this package.)
+## Table of Contents
 
-## Differences from upstream
+- [Image and Container Runtime](#image-and-container-runtime)
+- [Volume and Data Layout](#volume-and-data-layout)
+- [Installation and First-Run Flow](#installation-and-first-run-flow)
+- [Configuration Management](#configuration-management)
+- [Network Access and Interfaces](#network-access-and-interfaces)
+- [Actions (StartOS UI)](#actions-startos-ui)
+- [Job Execution and Multi-Arch](#job-execution-and-multi-arch)
+- [Backups and Restore](#backups-and-restore)
+- [Health Checks](#health-checks)
+- [Dependencies](#dependencies)
+- [Limitations and Differences](#limitations-and-differences)
+- [What Is Unchanged from Upstream](#what-is-unchanged-from-upstream)
+- [Contributing](#contributing)
+- [Quick Reference for AI Consumers](#quick-reference-for-ai-consumers)
 
-- Upstream `act_runner` expects you to provide a Docker/Podman socket; this package bundles rootless Podman and wires `DOCKER_HOST` automatically. The runner binary is copied from the official `gitea/act_runner` image.
-- Configuration is via the **Configure** action (persisted to `store.json`) rather than a hand-edited `config.yaml`; a default `config.yaml` is generated on first start.
-- A resource floor (2 GiB RAM, 2 CPU cores) is enforced before the runner starts.
+---
 
-## Build
+## Image and Container Runtime
 
-`npm ci && make` (or `make x86` for a single arch). See `UPDATING.md` for bumping the runner version.
+| Aspect | Standard install | StartOS |
+|---|---|---|
+| Image | The `act_runner` binary plus a Docker/Podman socket you supply | Custom image: Debian + rootless **Podman**, with the `act_runner` binary copied from the official `gitea/act_runner` image |
+| Architectures | depends on host | x86_64, aarch64 |
+| Job engine | an external Docker/Podman daemon you wire up | a rootless Podman engine bundled inside the service (`nestedRuntime`) |
+| Entrypoint | `act_runner daemon` | a wrapper that starts the Podman socket, writes your configured labels into `config.yaml`, registers once, then runs `act_runner daemon` |
 
-Upstream: <https://gitea.com/gitea/act_runner>
+Upstream expects you to provide a container engine; this package bundles a rootless Podman engine so each CI job is sandboxed without privileged Docker-in-Docker.
+
+## Volume and Data Layout
+
+| Aspect | StartOS |
+|---|---|
+| Primary volume | Single managed volume `main`, mounted at `/data` |
+| Runner working area | `/data/runner` — the generated `config.yaml`, the `.runner` registration state, and the Podman layer store (so job images survive restarts) |
+| StartOS settings | `/data/store.json` — registration token, runner name, labels, and concurrency (see [Configuration Management](#configuration-management)) |
+
+## Installation and First-Run Flow
+
+The runner does nothing until it is connected to a Gitea instance.
+
+1. On start, the entrypoint brings up the rootless Podman socket and generates a default `config.yaml`.
+2. If no registration token is configured, the service stays up but idle and prompts you to run **Configure**.
+3. Once configured, it registers once (idempotent via the `.runner` state file) and runs the runner daemon, which long-polls Gitea for jobs.
+
+## Configuration Management
+
+Upstream `act_runner` is configured through `config.yaml` and `register` flags. On StartOS you set the connection through the **Configure** action; values persist in `store.json` and are applied on each start.
+
+| Setting | Managed via |
+|---|---|
+| Registration token | "Configure" action |
+| Runner name | "Configure" action |
+| Labels | "Configure" action — written into `config.yaml` (act_runner ignores `register --labels`) |
+| Concurrent jobs | "Configure" action |
+| Forge URL | Always the local Gitea (`http://gitea.startos:3000`) |
+
+## Network Access and Interfaces
+
+**None.** The runner makes only outbound connections — it long-polls Gitea for jobs and pulls job images — and exposes no inbound interface. View its status and job logs inside Gitea (its Runners list and the Actions tab), plus the StartOS service logs.
+
+## Actions (StartOS UI)
+
+| Action | Visibility | Availability | Purpose |
+|---|---|---|---|
+| Configure | Visible | Any | Set the registration token, runner name, labels, and concurrency |
+
+### Configure
+
+- **Inputs:** Registration token (required), runner name, labels, concurrent jobs
+- **Outputs:** None — restart the service to apply
+- Each run drops the existing registration so the next start re-registers with the new settings. Registration tokens are single-use, so provide a fresh one each time.
+
+## Job Execution and Multi-Arch
+
+Each job runs in its own container via the bundled rootless Podman engine. StartOS registers QEMU `binfmt` handlers host-wide, so a job targeting a foreign architecture (`arm64`, `riscv64`, …) runs under emulation automatically — no per-container setup. Emulated builds are much slower than native; for regular multi-arch work, prefer a native runner per architecture and reserve emulation for architectures you have no native hardware for.
+
+## Backups and Restore
+
+| Aspect | StartOS |
+|---|---|
+| Scope | Full `/data` volume — `store.json`, the runner config, registration state, and cached job images |
+| Restore | The volume is fully restored before the service starts; the runner reconnects with its existing registration |
+
+## Health Checks
+
+| Aspect | StartOS |
+|---|---|
+| Method | Reflects configuration state, displayed as "Runner" |
+| Grace period | 60 seconds |
+| Behavior | Healthy once a registration token is configured; otherwise prompts you to run **Configure** |
+
+## Dependencies
+
+| Dependency | Required? | Purpose |
+|---|---|---|
+| **Gitea** | Required (running) | The forge this runner serves. The runner registers and long-polls over Gitea's HTTP API, so Gitea's web-interface health check must be passing. |
+
+This runner serves only the Gitea on the same device — there is no remote-forge mode.
+
+## Limitations and Differences
+
+1. **Local forge only** — registers against the Gitea on this device; there is no remote-instance option.
+2. **No inbound interface** — outbound-only; status and logs are viewed in Gitea, not in a runner UI.
+3. **Labels come from `config.yaml`** — `act_runner` ignores `register --labels`, so the package writes the labels you set in **Configure** into the generated config and replaces act_runner's defaults.
+4. **Emulated foreign-arch jobs are slow** — a native runner per architecture is preferred for regular multi-arch builds.
+
+## What Is Unchanged from Upstream
+
+Everything not listed above behaves as documented at <https://docs.gitea.com/usage/actions/overview> — workflow syntax, the `register`/`daemon` behavior, label matching, and job execution semantics.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for build instructions and the development workflow.
+
+---
+
+## Quick Reference for AI Consumers
+
+```yaml
+package_id: act-runner
+image: custom (Debian + rootless Podman + act_runner)
+architectures: [x86_64, aarch64]
+volumes:
+  main: /data
+ports: none
+dependencies:
+  - gitea (required, running)
+startos_managed_env_vars:
+  - INSTANCE_URL
+  - RUNNER_TOKEN
+  - RUNNER_NAME
+  - RUNNER_LABELS
+  - XDG_RUNTIME_DIR
+actions:
+  - configure
+```
