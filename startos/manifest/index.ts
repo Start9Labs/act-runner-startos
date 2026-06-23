@@ -6,7 +6,7 @@ export const manifest = setupManifest({
   title: 'Gitea Actions Runner',
   license: 'MIT',
   packageRepo: 'https://github.com/Start9Labs/act-runner-startos',
-  upstreamRepo: 'https://gitea.com/gitea/act_runner',
+  upstreamRepo: 'https://gitea.com/gitea/runner',
   marketingUrl: 'https://gitea.com/',
   donationUrl: null,
   description: { short, long },

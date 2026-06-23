@@ -6,9 +6,9 @@
 
 > **Upstream docs:** <https://docs.gitea.com/usage/actions/overview>
 >
-> Everything not listed in this document behaves identically to upstream act_runner. If a feature, setting, or behavior is not mentioned here, the upstream documentation is accurate and fully applicable.
+> Everything not listed in this document behaves identically to upstream gitea-runner. If a feature, setting, or behavior is not mentioned here, the upstream documentation is accurate and fully applicable.
 
-[act_runner](https://gitea.com/gitea/act_runner) executes Gitea Actions (CI/CD) workflows. This repository packages it for [StartOS](https://github.com/Start9Labs/start-os/), where it runs each job inside a rootless, nested OCI sandbox and serves the Gitea instance installed on the same device.
+[gitea-runner](https://gitea.com/gitea/runner) executes Gitea Actions (CI/CD) workflows. This repository packages it for [StartOS](https://github.com/Start9Labs/start-os/), where it runs each job inside a rootless, nested OCI sandbox and serves the Gitea instance installed on the same device.
 
 ---
 
@@ -35,10 +35,10 @@
 
 | Aspect | Standard install | StartOS |
 |---|---|---|
-| Image | The `act_runner` binary plus a Docker/Podman socket you supply | Custom image: Debian + rootless **Podman**, with the `act_runner` binary copied from the official `gitea/act_runner` image |
+| Image | The `gitea-runner` binary plus a Docker/Podman socket you supply | Custom image: Debian + rootless **Podman**, with the `gitea-runner` binary copied from the official `gitea/runner` image |
 | Architectures | depends on host | x86_64, aarch64 |
 | Job engine | an external Docker/Podman daemon you wire up | a rootless Podman engine bundled inside the service (`nestedRuntime`) |
-| Entrypoint | `act_runner daemon` | a wrapper that starts the Podman socket, writes your configured labels into `config.yaml`, registers once, then runs `act_runner daemon` |
+| Entrypoint | `gitea-runner daemon` | a wrapper that starts the Podman socket, writes your configured labels into `config.yaml`, registers once, then runs `gitea-runner daemon` |
 
 Upstream expects you to provide a container engine; this package bundles a rootless Podman engine so each CI job is sandboxed without privileged Docker-in-Docker.
 
@@ -60,13 +60,13 @@ The runner does nothing until it is connected to a Gitea instance.
 
 ## Configuration Management
 
-Upstream `act_runner` is configured through `config.yaml` and `register` flags. On StartOS you set the connection through the **Configure** action; values persist in `store.json` and are applied on each start.
+Upstream `gitea-runner` is configured through `config.yaml` and `register` flags. On StartOS you set the connection through the **Configure** action; values persist in `store.json` and are applied on each start.
 
 | Setting | Managed via |
 |---|---|
 | Registration token | "Configure" action |
 | Runner name | "Configure" action |
-| Labels | "Configure" action — written into `config.yaml` (act_runner ignores `register --labels`) |
+| Labels | "Configure" action — written into `config.yaml` (gitea-runner ignores `register --labels`) |
 | Concurrent jobs | "Configure" action |
 | Forge URL | Always the local Gitea (`http://gitea.startos:3000`) |
 
@@ -117,7 +117,7 @@ This runner serves only the Gitea on the same device — there is no remote-forg
 
 1. **Local forge only** — registers against the Gitea on this device; there is no remote-instance option.
 2. **No inbound interface** — outbound-only; status and logs are viewed in Gitea, not in a runner UI.
-3. **Labels come from `config.yaml`** — `act_runner` ignores `register --labels`, so the package writes the labels you set in **Configure** into the generated config and replaces act_runner's defaults.
+3. **Labels come from `config.yaml`** — `gitea-runner` ignores `register --labels`, so the package writes the labels you set in **Configure** into the generated config and replaces gitea-runner's defaults.
 4. **Emulated foreign-arch jobs are slow** — a native runner per architecture is preferred for regular multi-arch builds.
 
 ## What Is Unchanged from Upstream
@@ -134,7 +134,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for build instructions and the developmen
 
 ```yaml
 package_id: act-runner
-image: custom (Debian + rootless Podman + act_runner)
+image: custom (Debian + rootless Podman + gitea-runner)
 architectures: [x86_64, aarch64]
 volumes:
   main: /data
