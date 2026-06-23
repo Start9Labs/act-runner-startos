@@ -16,13 +16,14 @@ export const long = {
   pl_PL:
     'Gitea Runner wykonuje przepływy pracy Gitea Actions dla instancji Gitea na tym urządzeniu, uruchamiając każde zadanie w izolowanym, bezrootowym kontenerze OCI. Publikowane na licencji MIT.',
   fr_FR:
-    'Gitea Runner exécute les workflows Gitea Actions pour l\'instance Gitea sur cet appareil, en lançant chaque tâche dans un conteneur OCI isolé et sans privilèges root. Publié sous la licence MIT.',
+    "Gitea Runner exécute les workflows Gitea Actions pour l'instance Gitea sur cet appareil, en lançant chaque tâche dans un conteneur OCI isolé et sans privilèges root. Publié sous la licence MIT.",
 }
 
 export const dependencyDescription = {
   en_US: 'The Gitea instance on this device that this runner serves.',
-  es_ES: 'La instancia de Gitea en este dispositivo a la que sirve este ejecutor.',
+  es_ES:
+    'La instancia de Gitea en este dispositivo a la que sirve este ejecutor.',
   de_DE: 'Die Gitea-Instanz auf diesem Gerät, die dieser Runner bedient.',
   pl_PL: 'Instancja Gitea na tym urządzeniu, którą obsługuje ten runner.',
-  fr_FR: 'L\'instance Gitea sur cet appareil que ce runner dessert.',
+  fr_FR: "L'instance Gitea sur cet appareil que ce runner dessert.",
 }

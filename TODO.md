@@ -1,7 +1,5 @@
 # TODO
 
-- Translate in-app strings (currently English-only; see `startos/i18n/dictionaries/translations.ts`).
-- Add a dedicated "enable emulation" toggle that appends foreign-arch labels (today emulation is opt-in by adding arch labels manually).
-- Sibling package: `forgejo-runner-startos` (Forgejo), near-identical to this one.
-- Health check: `ready` keys off the store token (set by Configure), so a runner registered out-of-band shows red despite working. Key it off `.runner` / live forge connectivity instead. (Cooldown trigger added to stop the per-second log spam.)
+- Emulation toggle: gitea's act_runner (1.0.8) has no `?platform=` label option (unlike forgejo-runner), so a foreign-arch label can't pin the platform — emulating a whole foreign-arch job would require a single-arch foreign image rather than the multi-arch catthehacker default. Revisit if upstream adds platform pinning. (The forgejo-runner sibling implements this toggle.)
+- Sibling package: `forgejo-runner-startos` (Forgejo). Now diverges: Forgejo is on the v12 connection model (UUID + token) and has the emulation toggle; Gitea keeps the `register` flow.
 - SDK 2.0: swap `nestedRuntime: true` back to `userspaceFilesystems: true` + `virtualNetworking: true` when the registry moves to SDK 2.0 (1.5.3 has the combined `nestedRuntime` flag).

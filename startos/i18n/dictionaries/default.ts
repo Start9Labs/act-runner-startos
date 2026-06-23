@@ -4,7 +4,7 @@ const dict = {
   'This device does not meet the minimum requirements to run CI jobs (2 GiB RAM and 2 CPU cores).': 0,
   'Store not found': 1,
   Runner: 2,
-  'Runner is configured': 3,
+  'Runner is registered': 3,
   'Run the Configure action to connect this runner to a Gitea instance': 4,
   'Registration Token': 5,
   'A runner registration token from the Gitea instance, under Site/Org/Repo Settings → Actions → Runners → Create new Runner.': 6,

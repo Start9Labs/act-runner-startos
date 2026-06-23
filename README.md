@@ -101,9 +101,9 @@ Each job runs in its own container via the bundled rootless Podman engine. Start
 
 | Aspect | StartOS |
 |---|---|
-| Method | Reflects configuration state, displayed as "Runner" |
+| Method | Reflects registration state, displayed as "Runner" |
 | Grace period | 60 seconds |
-| Behavior | Healthy once a registration token is configured; otherwise prompts you to run **Configure** |
+| Behavior | Healthy once the runner has registered (its `.runner` state file exists); otherwise prompts you to run **Configure** |
 
 ## Dependencies
 

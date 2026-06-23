@@ -2,6 +2,7 @@ import { cpus, totalmem } from 'os'
 import { i18n } from './i18n'
 import { sdk } from './sdk'
 import { storeJson } from './fileModels/store.json'
+import { runnerState } from './fileModels/runnerState'
 import {
   DATA_DIR,
   LOCAL_FORGE_URL,
@@ -23,9 +24,6 @@ export const main = sdk.setupMain(async ({ effects }) => {
 
   const store = await storeJson.read().const(effects)
   if (!store) throw new Error(i18n('Store not found'))
-
-  // Local-only: the runner always registers against the Gitea on this device.
-  const configured = !!store.registrationToken
 
   const subcontainer = await sdk.SubContainer.of(
     effects,
@@ -66,12 +64,13 @@ export const main = sdk.setupMain(async ({ effects }) => {
       ready: {
         display: i18n('Runner'),
         gracePeriod: 60000,
-        // Poll slowly: an unconfigured runner is a steady state, not a flapping
-        // one, so there's no need to re-check (and log) every second.
+        // Key health off the registration state file, not the store token: a
+        // runner registered out-of-band has a live `.runner` but no token here.
+        // Poll slowly — registration state is steady, not flapping.
         trigger: sdk.trigger.cooldownTrigger(30000),
         fn: async () =>
-          configured
-            ? { result: 'success', message: i18n('Runner is configured') }
+          (await runnerState.read().const(effects))
+            ? { result: 'success', message: i18n('Runner is registered') }
             : {
                 result: 'failure',
                 message: i18n(

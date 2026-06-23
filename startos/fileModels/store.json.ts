@@ -5,7 +5,7 @@ const shape = z
   .object({
     registrationToken: z.string().catch(''),
     runnerName: z.string().catch(''),
-    // forgejo-runner label syntax: "<name>:docker://<image>" or "<name>:host".
+    // gitea-runner label syntax: "<name>:docker://<image>" or "<name>:host".
     // Add foreign-arch labels here to also serve emulated jobs (slow — see README).
     labels: z
       .string()
