@@ -31,7 +31,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
     effects,
     { imageId: 'main' },
     mount,
-    'act-runner-sub',
+    'gitea-runner-sub',
   )
 
   return sdk.Daemons.of(effects)

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Orchestrates a rootless Podman engine + the Gitea Actions runner (act_runner)
+# Orchestrates a rootless Podman engine + the Gitea Actions runner (gitea-runner)
 # inside the service container. main.ts passes the forge connection via the env.
 set -euo pipefail
 
@@ -35,10 +35,10 @@ for _ in $(seq 1 60); do
   sleep 1
 done
 
-# act_runner takes runner labels from config.yaml — its `register --labels`
-# flag is ignored. Regenerate the config each start and inject the configured
-# labels so the Configure action's labels actually take effect.
-act_runner generate-config >"$CONFIG"
+# gitea-runner reads runner labels from config.yaml. Regenerate the config each
+# start and inject the configured labels (replacing the image defaults) so the
+# Configure action's labels take effect.
+gitea-runner generate-config >"$CONFIG"
 if [ -n "$RUNNER_LABELS" ]; then
   awk -v labels="$RUNNER_LABELS" '
     /^  labels:[[:space:]]*$/ {
@@ -48,7 +48,7 @@ if [ -n "$RUNNER_LABELS" ]; then
         gsub(/^[ \t]+|[ \t]+$/, "", a[i])
         if (a[i] != "") print "    - \"" a[i] "\""
       }
-      skip = 1          # drop act_runner default label entries below
+      skip = 1          # drop gitea-runner default label entries below
       next
     }
     skip && /^[[:space:]]*-/ { next }
@@ -61,15 +61,15 @@ fi
 if [ ! -f "$DATA/.runner" ]; then
   if [ -n "$INSTANCE_URL" ] && [ -n "$RUNNER_TOKEN" ]; then
     echo "Registering runner '$RUNNER_NAME' with $INSTANCE_URL ..."
-    act_runner register --no-interactive \
+    gitea-runner register --no-interactive \
       --instance "$INSTANCE_URL" --token "$RUNNER_TOKEN" \
       --name "$RUNNER_NAME" --config "$CONFIG"
   else
-    echo "act_runner: not configured. Run the 'Configure' action to set a" \
+    echo "gitea-runner: not configured. Run the 'Configure' action to set a" \
          "Gitea URL + registration token, then restart this service." >&2
     # Stay alive so the health check can report 'needs config' instead of crash-looping.
     exec sleep infinity
   fi
 fi
 
-exec act_runner daemon --config "$CONFIG"
+exec gitea-runner daemon --config "$CONFIG"

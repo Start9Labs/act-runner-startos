@@ -1,6 +1,6 @@
-# act_runner binary, pulled from the official multi-arch image (pinned).
+# gitea-runner binary, pulled from the official multi-arch image (pinned).
 # Bump the tag here and the version in startos/versions/current.ts together.
-FROM gitea/act_runner:0.6.1 AS runner
+FROM gitea/runner:1.0.8 AS runner
 
 FROM debian:trixie-slim
 
@@ -13,7 +13,7 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-COPY --from=runner /usr/local/bin/act_runner /usr/local/bin/act_runner
+COPY --from=runner /usr/local/bin/gitea-runner /usr/local/bin/gitea-runner
 
 RUN mkdir -p /etc/containers \
  && printf 'unqualified-search-registries = ["docker.io"]\n' \

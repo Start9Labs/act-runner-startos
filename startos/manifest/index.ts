@@ -2,11 +2,11 @@ import { setupManifest } from '@start9labs/start-sdk'
 import { dependencyDescription, long, short } from './i18n'
 
 export const manifest = setupManifest({
-  id: 'act-runner',
-  title: 'Gitea Actions Runner',
+  id: 'gitea-runner',
+  title: 'Gitea Runner',
   license: 'MIT',
-  packageRepo: 'https://github.com/Start9Labs/act-runner-startos',
-  upstreamRepo: 'https://gitea.com/gitea/act_runner',
+  packageRepo: 'https://github.com/Start9Labs/gitea-runner-startos',
+  upstreamRepo: 'https://gitea.com/gitea/runner',
   marketingUrl: 'https://gitea.com/',
   donationUrl: null,
   description: { short, long },

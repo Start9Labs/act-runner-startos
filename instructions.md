@@ -1,4 +1,4 @@
-# Gitea Actions Runner
+# Gitea Runner
 
 ## Documentation
 
@@ -18,7 +18,7 @@ This runner serves the Gitea on the same device, so install and start **Gitea** 
 
 > Running **Configure** re-registers the runner on the next start, so supply a fresh token each time (registration tokens are single-use).
 
-## Using the Gitea Actions Runner
+## Using the Gitea Runner
 
 Once it is online, Gitea dispatches workflow jobs to it automatically — there is nothing to drive here day to day. Follow progress and read job logs in Gitea's **Actions** tab; the service logs here show registration and startup.
 

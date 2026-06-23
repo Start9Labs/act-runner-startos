@@ -8,15 +8,15 @@ export const short = {
 
 export const long = {
   en_US:
-    'act_runner executes Gitea Actions workflows for the Gitea instance on this device, running each job inside an isolated, rootless OCI container. Published under the MIT license.',
+    'Gitea Runner executes Gitea Actions workflows for the Gitea instance on this device, running each job inside an isolated, rootless OCI container. Published under the MIT license.',
   es_ES:
-    'act_runner ejecuta flujos de trabajo de Gitea Actions para la instancia de Gitea en este dispositivo, ejecutando cada tarea dentro de un contenedor OCI aislado y sin privilegios de root. Publicado bajo la licencia MIT.',
+    'Gitea Runner ejecuta flujos de trabajo de Gitea Actions para la instancia de Gitea en este dispositivo, ejecutando cada tarea dentro de un contenedor OCI aislado y sin privilegios de root. Publicado bajo la licencia MIT.',
   de_DE:
-    'act_runner führt Gitea-Actions-Workflows für die Gitea-Instanz auf diesem Gerät aus und lässt jeden Auftrag in einem isolierten, rootless OCI-Container laufen. Veröffentlicht unter der MIT-Lizenz.',
+    'Gitea Runner führt Gitea-Actions-Workflows für die Gitea-Instanz auf diesem Gerät aus und lässt jeden Auftrag in einem isolierten, rootless OCI-Container laufen. Veröffentlicht unter der MIT-Lizenz.',
   pl_PL:
-    'act_runner wykonuje przepływy pracy Gitea Actions dla instancji Gitea na tym urządzeniu, uruchamiając każde zadanie w izolowanym, bezrootowym kontenerze OCI. Publikowane na licencji MIT.',
+    'Gitea Runner wykonuje przepływy pracy Gitea Actions dla instancji Gitea na tym urządzeniu, uruchamiając każde zadanie w izolowanym, bezrootowym kontenerze OCI. Publikowane na licencji MIT.',
   fr_FR:
-    'act_runner exécute les workflows Gitea Actions pour l\'instance Gitea sur cet appareil, en lançant chaque tâche dans un conteneur OCI isolé et sans privilèges root. Publié sous la licence MIT.',
+    'Gitea Runner exécute les workflows Gitea Actions pour l\'instance Gitea sur cet appareil, en lançant chaque tâche dans un conteneur OCI isolé et sans privilèges root. Publié sous la licence MIT.',
 }
 
 export const dependencyDescription = {

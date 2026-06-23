@@ -1,16 +1,16 @@
 import { VersionInfo, IMPOSSIBLE } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '0.6.1:0',
+  version: '1.0.8:0',
   releaseNotes: {
-    en_US: `Initial Gitea Actions Runner (act_runner) release for StartOS.`,
-    es_ES: `Versión inicial del ejecutor de Gitea Actions (act_runner) para StartOS.`,
-    de_DE: `Erste Gitea-Actions-Runner-Veröffentlichung (act_runner) für StartOS.`,
-    pl_PL: `Pierwsze wydanie runnera Gitea Actions (act_runner) dla StartOS.`,
-    fr_FR: `Version initiale de l'exécuteur Gitea Actions (act_runner) pour StartOS.`,
+    en_US: `Initial Gitea Runner release for StartOS.`,
+    es_ES: `Versión inicial de Gitea Runner para StartOS.`,
+    de_DE: `Erste Gitea-Runner-Veröffentlichung für StartOS.`,
+    pl_PL: `Pierwsze wydanie Gitea Runner dla StartOS.`,
+    fr_FR: `Version initiale de Gitea Runner pour StartOS.`,
   },
   migrations: {
-    // First release of the act_runner package — nothing to migrate from.
+    // First release of the Gitea Runner package — nothing to migrate from.
     up: async () => {},
     down: IMPOSSIBLE,
   },
